@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>보도자료 생성기</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:'Malgun Gothic',sans-serif;margin:0;background:#eef1f5;color:#222}
+.wrap{display:flex;gap:16px;padding:16px;align-items:flex-start;flex-wrap:wrap}
+.panel{background:#fff;border-radius:10px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.left{flex:1 1 440px;max-width:580px}
+.right{flex:1 1 460px}
+h2{margin:0 0 12px;font-size:18px;border-bottom:2px solid #1a56a0;padding-bottom:8px}
+label{display:block;font-size:12px;font-weight:700;margin:10px 0 4px;color:#1a56a0}
+input,select,textarea{width:100%;padding:7px 9px;border:1px solid #c8cfd8;border-radius:5px;font-size:13px;font-family:inherit}
+textarea{resize:vertical}
+.row{display:flex;gap:8px}.row>div{flex:1}
+button{background:#1a56a0;color:#fff;border:0;padding:9px 14px;border-radius:5px;font-size:13px;font-weight:700;cursor:pointer;margin:12px 6px 0 0}
+button.sub{background:#5a6b7d}
+.hint{font-size:11px;color:#7a8696;margin-top:3px}
+.para{border:1px solid #dde3ea;border-radius:6px;padding:10px;margin-bottom:8px;background:#fafbfc}
+.para textarea{min-height:58px}
+.del{background:#c0392b;float:right;padding:3px 8px;margin:0;font-size:11px}
+/* 제목 추천 */
+.gen{background:#f4f8ff;border:1px solid #c9dcf5;border-radius:8px;padding:12px;margin-top:10px}
+.cand{display:flex;align-items:center;gap:8px;padding:7px 9px;border-bottom:1px dashed #d4e0f0;font-size:13.5px}
+.cand:last-child{border-bottom:0}
+.cand .txt{flex:1;font-family:'Batang',serif;font-weight:700}
+.cand .len{font-size:11px;color:#8a95a5;min-width:34px;text-align:right}
+.cand button{margin:0;padding:4px 9px;font-size:11px;font-weight:400}
+.tagline{font-size:11px;color:#1a56a0;background:#e3edfb;border-radius:3px;padding:1px 5px;margin-right:4px}
+/* 미리보기 */
+#out{background:#fff;border:1px solid #ccc;padding:28px 30px;min-height:600px;font-family:'Batang',serif;line-height:1.6}
+.hdr{border:1.5px solid #000;display:flex;align-items:center;padding:8px 12px}
+.hdr .t{font-size:30px;font-weight:700;letter-spacing:6px;flex:1;text-align:center}
+.hdr .d{font-size:13px;text-align:center;margin-top:4px}
+.org{flex:1;text-align:center;font-size:15px;font-weight:700;color:#1a56a0}
+.meta{border:1.5px solid #000;border-top:0;padding:5px 12px;font-size:12.5px}
+.meta2{padding:5px 12px;font-size:13px;font-weight:700;border-bottom:1.5px solid #000}
+.title{font-size:25px;font-weight:700;text-align:center;margin:16px 0 8px;font-family:'HY견명조','Batang',serif;line-height:1.35}
+.subtitle{font-size:14px;text-align:center;background:#fffbcc;padding:4px 4px 6px;font-family:'Malgun Gothic',sans-serif;border-bottom:1.5px solid #000}
+.body p{font-size:15px;margin:14px 0;text-indent:-18px;padding-left:18px;text-align:justify;word-break:keep-all}
+.end{font-size:15px;margin-top:26px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="panel left">
+<h2>① 기본 정보</h2>
+<label>발행 기관</label>
+<select id="org">
+  <option value="제주특별자치도교육청|교육감|고의숙|도교육청">제주특별자치도교육청 (교육감 고의숙)</option>
+  <option value="제주시교육지원청|교육장|고성범|제주시교육지원청">제주시교육지원청 (교육장 고성범)</option>
+  <option value="서귀포시교육지원청|교육장|○○○|서귀포시교육지원청">서귀포시교육지원청 (교육장 ○○○)</option>
+</select>
+<label>배포일</label><input type="date" id="date">
+<div class="row">
+<div><label>부서명</label><input id="dept" placeholder="정책기획과"></div>
+<div><label>팀(담당)명</label><input id="team" placeholder="기획조정담당"></div>
+</div>
+<div class="row">
+<div><label>전화</label><input id="tel" placeholder="064-710-0171"></div>
+<div><label>담당자</label><input id="staff" placeholder="장학관 김명훈 / 장학사 김성희"></div>
+</div>
+<button class="sub" onclick="saveDept()">부서정보 저장</button>
+<button class="sub" onclick="loadDept()">불러오기</button>
+
+<h2 style="margin-top:22px">② 핵심 사실 (육하원칙)</h2>
+<div class="row">
+<div><label>유형</label>
+<select id="w_type">
+<option value="event">행사·프로그램 운영(예고)</option>
+<option value="result">결과·성과 발표</option>
+<option value="survey">조사·통계 결과</option>
+<option value="policy">정책·계획 발표</option>
+<option value="contest">대회 출전·참가</option>
+<option value="support">지원·예산 집행</option>
+</select></div>
+<div><label>서술어</label>
+<select id="w_verb">
+<option>운영한다고 밝혔다</option><option>개최한다고 밝혔다</option>
+<option>실시한다고 밝혔다</option><option>추진한다고 밝혔다</option>
+<option>발표했다</option><option>참가한다고 밝혔다</option>
+</select></div>
+</div>
+<div class="row">
+<div><label>기간/일시</label><input id="w_when" placeholder="오는 17일부터 내달 7일까지"></div>
+<div><label>장소</label><input id="w_where" placeholder="제주시 내 6곳 체험기관"></div>
+</div>
+<div class="row">
+<div><label>대상·규모</label><input id="w_who" placeholder="관내 초·중학교 특수교육대상자 81명"></div>
+<div><label>수치(선택)</label><input id="w_num" placeholder="81명 / 4회 / 3,029명"></div>
+</div>
+<label>사업·행사명</label>
+<input id="w_what" placeholder="제29회 「행복 충전 주말 교실 토요프로그램」">
+<div class="row">
+<div><label>핵심 키워드 <span class="hint">쉼표 구분</span></label><input id="w_key" placeholder="공예, 댄스, 베이킹"></div>
+<div><label>기대효과·가치</label><input id="w_value" placeholder="창의적 인재 / 미래 역량 / 교육격차 해소"></div>
+</div>
+<button onclick="genLead()">리드문 생성</button>
+
+<h2 style="margin-top:22px">③ 제목·부제목 추천기</h2>
+<div class="gen">
+  <button onclick="genTitles()">제목 후보 생성</button>
+  <button class="sub" onclick="genTitles(true)">다시 섞기</button>
+  <div class="hint">주제목 권장 15~22자 · 부제목은 「기관명, 사실요약」 고정</div>
+  <div id="cands" style="margin-top:8px"></div>
+</div>
+<label>주제목 (확정)</label><input id="title" placeholder="공예부터 댄스까지…창의적 인재 키운다">
+<label>부제목 (확정)</label><input id="subtitle" placeholder="제주시교육지원청, 17일부터 제29회 「…」 운영">
+<div id="subcands"></div>
+
+<h2 style="margin-top:22px">④ 본문 단락 (□)</h2>
+<div id="paras"></div>
+<button class="sub" onclick="addPara('')">+ 단락 추가</button>
+
+<h2 style="margin-top:22px">⑤ 마무리 인용</h2>
+<div class="row">
+<div><label>발언자</label><input id="sp" placeholder="고의숙 교육감"></div>
+<div><label>서술</label><select id="spv"><option>말했다</option><option>밝혔다</option><option>강조했다</option><option>격려할 예정이다</option></select></div>
+</div>
+<label>인용 1 (현재 의미)</label><textarea id="q1" rows="2"></textarea>
+<label>인용 2 (향후 포부)</label><textarea id="q2" rows="2"></textarea>
+<label style="margin-top:14px">붙임</label><input id="attach" placeholder="사진 2매">
+
+<button onclick="render()">미리보기 갱신</button>
+<button onclick="copyText()">본문 복사</button>
+<button class="sub" onclick="window.print()">인쇄 / PDF</button>
+</div>
+
+<div class="panel right">
+<h2>미리보기</h2>
+<div id="out"></div>
+</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const V=id=>$(id).value.trim();
+function orgInfo(){return $('org').value.split('|');}
+
+/* ---------- 본문 단락 ---------- */
+function addPara(v){
+  const d=document.createElement('div');
+  d.className='para';
+  d.innerHTML=`<button class="del" onclick="this.parentNode.remove();render()">삭제</button>
+  <div style="font-size:11px;font-weight:700;color:#1a56a0">□ 단락</div><textarea>${v||''}</textarea>`;
+  $('paras').appendChild(d);
+}
+function genLead(){
+  const [full,post,name]=orgInfo();
+  const bits=[V('w_when'),V('w_where')&&V('w_where')+'에서',
+    V('w_who')&&V('w_who')+'을 대상으로',V('w_what')].filter(Boolean).join(' ');
+  const lead=`${full}(${post} ${name})은 ${bits}을 ${$('w_verb').value}.`;
+  const f=$('paras').querySelector('textarea');
+  if(f&&!f.value.trim()) f.value=lead; else addPara(lead);
+  render();
+}
+
+/* ---------- 제목 추천 엔진 ---------- */
+const VERB={
+ event:['문 연다','펼친다','시작된다','한자리에'],
+ result:['빛났다','결실 맺다','성과 거뒀다','주목'],
+ survey:['물었다','한눈에','담았다','확인'],
+ policy:['나선다','본격 추진','청사진 그린다','힘 싣는다'],
+ contest:['기량 뽐낸다','도전장 던진다','출사표','실력 겨룬다'],
+ support:['손 내민다','뒷받침한다','집중 지원','채운다']
+};
+const TAIL={
+ event:'운영',result:'결과 발표',survey:'결과 발표',
+ policy:'추진',contest:'참가',support:'지원'
+};
+function keys(){return V('w_key').split(/[,·]/).map(s=>s.trim()).filter(Boolean);}
+function coreName(){ // 「」 안쪽 또는 사업명 축약
+  const m=V('w_what').match(/[「『](.+?)[」』]/);
+  return m?m[1]:V('w_what').replace(/^제\d+[회년차]\s*/,'');
+}
+function shuffle(a){return a.sort(()=>Math.random()-.5);}
+
+function genTitles(reshuffle){
+  const t=$('w_type').value, k=keys(), core=coreName();
+  const val=V('w_value'), num=V('w_num'), who=V('w_who'), vb=VERB[t];
+  const L=[];
+  const push=(tag,s)=>{ s=s.replace(/\s+/g,' ').trim(); if(s.length>6) L.push({tag,s}); };
+
+  if(k.length>=2) push('열거형',`${k[0]}부터 ${k[k.length-1]}까지…${val||vb[0]}`);
+  if(val) push('가치형',`${val}, ${core||'제주교육'}에서 ${vb[0]}`);
+  if(core) push('사업형',`${core}, ${val?val+' ':''}${vb[1]}`);
+  if(num) push('수치형',`${num}이 함께한 ${core||val||'제주교육'}`);
+  if(who) push('주체형',`${who.replace(/\s*\d+명/,'')}, ${val||core} ${vb[2]}`);
+  if(val) push('메시지형',`"${val}"…${core||'제주교육'} ${vb[3]}`);
+  if(k.length) push('키워드형',`${k.join('·')} 품은 ${core||'제주교육'}`);
+  push('기본형',`${core||val||'제주교육'} ${vb[0]}`);
+
+  const list=reshuffle?shuffle(L):L;
+  $('cands').innerHTML=list.slice(0,6).map(o=>{
+    const len=o.s.replace(/\s/g,'').length;
+    const col=(len>24)?'#c0392b':(len<10?'#c08b00':'#2a7');
+    return `<div class="cand"><span class="tagline">${o.tag}</span>
+    <span class="txt">${o.s}</span>
+    <span class="len" style="color:${col}">${len}자</span>
+    <button onclick="pick(this)">선택</button></div>`;
+  }).join('')||'<div class="hint">②에 키워드·가치·사업명을 먼저 입력하세요.</div>';
+
+  genSubs();
+}
+function pick(b){ $('title').value=b.parentNode.querySelector('.txt').textContent; render(); }
+function pickSub(b){ $('subtitle').value=b.parentNode.querySelector('.txt').textContent; render(); }
+
+function genSubs(){
+  const short=orgInfo()[3], t=$('w_type').value, tail=TAIL[t];
+  const S=[];
+  const base=[V('w_when'),V('w_what')].filter(Boolean).join(' ');
+  if(base) S.push(`${short}, ${base} ${tail}`);
+  if(V('w_who')) S.push(`${short}, ${V('w_who')} 대상 ${coreName()} ${tail}`);
+  if(V('w_where')) S.push(`${short}, ${V('w_where')}에서 ${coreName()} ${tail}`);
+  if(V('w_num')) S.push(`${short}, ${coreName()} ${V('w_num')} 규모 ${tail}`);
+  $('subcands').innerHTML=S.length?`<div class="gen" style="margin-top:6px">
+  ${S.map(s=>`<div class="cand"><span class="txt" style="font-weight:400">${s}</span>
+  <span class="len">${s.replace(/\s/g,'').length}자</span>
+  <button onclick="pickSub(this)">선택</button></div>`).join('')}</div>`:'';
+}
+
+/* ---------- 저장 ---------- */
+function saveDept(){
+  localStorage.setItem('jje_dept',JSON.stringify({d:V('dept'),t:V('team'),p:V('tel'),s:V('staff'),o:$('org').value}));
+  alert('저장했습니다.');
+}
+function loadDept(){
+  const v=JSON.parse(localStorage.getItem('jje_dept')||'null');
+  if(!v)return alert('저장된 정보가 없습니다.');
+  $('dept').value=v.d;$('team').value=v.t;$('tel').value=v.p;$('staff').value=v.s;$('org').value=v.o;render();
+}
+
+/* ---------- 출력 ---------- */
+function fmtDate(){
+  const v=$('date').value; if(!v)return '2026. 00. 00.(금)';
+  const d=new Date(v+'T00:00'); const w='일월화수목금토'[d.getDay()];
+  return `${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.(${w})`;
+}
+function bodyText(){
+  const ps=[...$('paras').querySelectorAll('textarea')].map(t=>t.value.trim()).filter(Boolean);
+  const sp=V('sp'),q1=V('q1'),q2=V('q2');
+  if(sp&&(q1||q2)){
+    let s=`${sp}은 “${q1}”`;
+    if(q2) s+=`며 “${q2}”`;
+    s+=`고 ${$('spv').value}.`;
+    ps.push(s);
+  }
+  return ps;
+}
+function render(){
+  const [full]=orgInfo(), ps=bodyText(), at=V('attach');
+  $('out').innerHTML=`
+  <div class="hdr"><div><div class="t">보도자료</div><div class="d">${fmtDate()}</div></div>
+  <div class="org">${full}</div></div>
+  <div class="meta">자료 문의: ${V('dept')||'부서명'} &nbsp; ${V('team')||'팀명'} &nbsp; ☏ ${V('tel')||'064-710-0000'}</div>
+  <div class="meta2">담당자: ${V('staff')||'장학관 ○ ○ ○ / 장학사 ○ ○ ○'}</div>
+  <div class="title">${V('title')||'주제목을 입력하세요'}</div>
+  <div class="subtitle">${V('subtitle')||'부제목을 입력하세요'}</div>
+  <div class="body">${ps.map(p=>`<p>□ ${p}</p>`).join('')}</div>
+  <div class="end">${at?`○ 붙임 ${at}. &nbsp;끝.`:'끝.'}</div>`;
+}
+function copyText(){
+  const ps=bodyText(), at=V('attach');
+  const txt=[V('title'),V('subtitle'),'',...ps.map(p=>'□ '+p+'\n'),at?`○ 붙임 ${at}.  끝.`:'끝.'].join('\n');
+  navigator.clipboard.writeText(txt).then(()=>alert('복사 완료!'));
+}
+$('date').value=new Date().toISOString().slice(0,10);
+addPara('');addPara('');addPara('');
+document.addEventListener('input',()=>{render();});
+render();
+</script>
+</body>
+</html>
